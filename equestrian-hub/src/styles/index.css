@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force all text to be black globally */
+* {
+  color: #000000 !important;
+}
+
+body, p, span, a, h1, h2, h3, h4, h5, h6, label, button, div, li {
+  color: #000000 !important;
+}
+
+/* Override Tailwind utility classes that create white text */
+.text-white, .text-gray-50, .text-gray-100, .text-gray-200 {
+  color: #000000 !important;
+}
+
+/* Fix button text colors */
+.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  color: #000000 !important;
+  background-color: #ec4899 !important;
+}
+
+.btn-secondary, .btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active {
+  color: #000000 !important;
+  background-color: #22c55e !important;
+}
+
+/* Override any white text on colored backgrounds */
+.bg-primary, .bg-primary-500, .bg-primary-600, .bg-primary-700 {
+  color: #000000 !important;
+}
+
+.bg-secondary, .bg-secondary-500, .bg-secondary-600, .bg-secondary-700 {
+  color: #000000 !important;
+}
+
+/* Ensure form inputs have black text */
+input, textarea, select, button {
+  color: #000000 !important;
+}
+
+/* Fix placeholder text */
+::-webkit-input-placeholder {
+  color: #666666 !important;
+}
+:-moz-placeholder {
+  color: #666666 !important;
+}
+::-moz-placeholder {
+  color: #666666 !important;
+}
+:-ms-input-placeholder {
+  color: #666666 !important;
+}
+
+/* Override any navigation or header text */
+header *, footer * {
+  color: #000000 !important;
+}
+
+/* Ensure cards and components have black text */
+.card, .card * {
+  color: #000000 !important;
+}
+
+/* UPDATED: Remove underlines from all links */
+a {
+  color: #000000 !important;
+  text-decoration: none !important;
+}
+
+a:hover {
+  color: #db2777 !important; /* Pink shade on hover for visibility */
+  text-decoration: none !important;
+}
+
+/* Navigation links */
+nav a, header a {
+  color: #000000 !important;
+  text-decoration: none !important;
+}
+
+nav a:hover, header a:hover {
+  color: #db2777 !important;
+  text-decoration: none !important;
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #000000 !important;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    color: #000000 !important;
+  }
+}
