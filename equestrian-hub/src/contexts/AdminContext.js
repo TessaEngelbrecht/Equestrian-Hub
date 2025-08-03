@@ -214,7 +214,7 @@ export const AdminProvider = ({ children }) => {
         try {
             const { error } = await supabase
                 .from('orders')
-                .update({ status: 'completed', updated_at: new Date().toISOString() })
+                .update({ status: 'completed'})
                 .eq('id', orderId)
 
             if (error) throw error
@@ -228,7 +228,7 @@ export const AdminProvider = ({ children }) => {
         try {
             const { error } = await supabase
                 .from('lesson_bookings')
-                .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+                .update({ status: 'confirmed'})
                 .eq('id', bookingId)
 
             if (error) throw error
@@ -279,7 +279,7 @@ export const AdminProvider = ({ children }) => {
         try {
             const { error } = await supabase
                 .from('orders')
-                .update({ notes, updated_at: new Date().toISOString() })
+                .update({ notes })
                 .eq('id', orderId)
 
             if (error) throw error
@@ -293,7 +293,7 @@ export const AdminProvider = ({ children }) => {
         try {
             const { error } = await supabase
                 .from('lesson_bookings')
-                .update({ notes, updated_at: new Date().toISOString() })
+                .update({ notes})
                 .eq('id', bookingId)
 
             if (error) throw error
@@ -325,7 +325,7 @@ export const AdminProvider = ({ children }) => {
                 .insert({
                     ...productData,
                     created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
+                    //updated_at: new Date().toISOString()
                 })
                 .select()
                 .single()
@@ -344,7 +344,7 @@ export const AdminProvider = ({ children }) => {
                 .from('products')
                 .update({
                     ...productData,
-                    updated_at: new Date().toISOString()
+                    //updated_at: new Date().toISOString()
                 })
                 .eq('id', productId)
 
