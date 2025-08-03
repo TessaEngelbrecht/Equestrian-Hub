@@ -109,7 +109,7 @@ const AboutPage = () => {
                         </div>
                         <div>
                             <img
-                                src="https://images.unsplash.com/photo-1553284965-abfecfcd0d8e?w=600&h=400&fit=crop"
+                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqZGvw2XOvGhzdXYF_B-3KszM8WL7FmoOpFw&s"
                                 alt="Meadowbrook Equestrian facility"
                                 className="rounded-2xl shadow-xl"
                             />

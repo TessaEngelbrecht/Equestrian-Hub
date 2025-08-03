@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
-import { MapPin, Phone, Mail, Clock, Send, MessageSquare } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MapPin, Phone, Mail, Clock, Send, MessageSquare, AlertCircle } from 'lucide-react'
 import Header from '../components/Layout/Header'
 import Footer from '../components/Layout/Footer'
 import { sendContactEmail } from '../lib/emailjs'
@@ -22,6 +22,21 @@ const ContactPage = () => {
             ...prev,
             [e.target.name]: e.target.value
         }))
+        // Clear error when user starts typing
+        if (error) setError('')
+    }
+
+    const validateForm = () => {
+        if (!formData.name.trim()) return 'Please enter your name'
+        if (!formData.email.trim()) return 'Please enter your email'
+        if (!formData.subject) return 'Please select a subject'
+        if (!formData.message.trim()) return 'Please enter your message'
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(formData.email)) return 'Please enter a valid email address'
+
+        return null
     }
 
     const handleSubmit = async (e) => {
@@ -29,8 +44,17 @@ const ContactPage = () => {
         setLoading(true)
         setError('')
 
+        // Validate form
+        const validationError = validateForm()
+        if (validationError) {
+            setError(validationError)
+            setLoading(false)
+            return
+        }
+
         try {
             const result = await sendContactEmail(formData)
+
             if (result.success) {
                 setSuccess(true)
                 setFormData({
@@ -40,11 +64,17 @@ const ContactPage = () => {
                     subject: '',
                     message: ''
                 })
+
+                // Auto-hide success message after 10 seconds
+                setTimeout(() => {
+                    setSuccess(false)
+                }, 10000)
             } else {
-                setError('Failed to send message. Please try again.')
+                setError('Failed to send message. Please try again or contact us directly.')
             }
         } catch (err) {
-            setError('An error occurred. Please try again later.')
+            console.error('Contact form error:', err)
+            setError('An error occurred. Please try again later or contact us directly.')
         } finally {
             setLoading(false)
         }
@@ -73,7 +103,7 @@ const ContactPage = () => {
             icon: Mail,
             title: 'Email Us',
             details: [
-                'info@meadowbrookequestrian.com',
+                'tessa.engelbrecht@gmail.com',
                 'lessons@meadowbrookequestrian.com',
                 'shop@meadowbrookequestrian.com'
             ]
@@ -130,28 +160,42 @@ const ContactPage = () => {
                     >
                         <h2 className="text-2xl font-display font-bold text-primary mb-6">Send Us a Message</h2>
 
-                        {success && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg mb-6"
-                            >
-                                <div className="flex items-center">
-                                    <Send className="mr-2" size={18} />
-                                    <span>Your message has been sent successfully! We'll get back to you soon.</span>
-                                </div>
-                            </motion.div>
-                        )}
+                        {/* Success Message */}
+                        <AnimatePresence>
+                            {success && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-lg mb-6"
+                                >
+                                    <div className="flex items-center">
+                                        <Send className="mr-2 flex-shrink-0" size={18} />
+                                        <div>
+                                            <p className="font-medium">Message sent successfully!</p>
+                                            <p className="text-sm mt-1">We'll get back to you as soon as possible.</p>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                        {error && (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6"
-                            >
-                                {error}
-                            </motion.div>
-                        )}
+                        {/* Error Message */}
+                        <AnimatePresence>
+                            {error && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6"
+                                >
+                                    <div className="flex items-center">
+                                        <AlertCircle className="mr-2 flex-shrink-0" size={18} />
+                                        <span>{error}</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -166,7 +210,7 @@ const ContactPage = () => {
                                         required
                                         value={formData.name}
                                         onChange={handleChange}
-                                        className="input-field"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                                         placeholder="Your full name"
                                     />
                                 </div>
@@ -181,7 +225,7 @@ const ContactPage = () => {
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="input-field"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                                         placeholder="your@email.com"
                                     />
                                 </div>
@@ -198,7 +242,7 @@ const ContactPage = () => {
                                         name="phone"
                                         value={formData.phone}
                                         onChange={handleChange}
-                                        className="input-field"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                                         placeholder="+27 12 345 6789"
                                     />
                                 </div>
@@ -212,7 +256,7 @@ const ContactPage = () => {
                                         required
                                         value={formData.subject}
                                         onChange={handleChange}
-                                        className="input-field"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors"
                                     >
                                         <option value="">Select a subject</option>
                                         <option value="Riding Lessons">Riding Lessons</option>
@@ -236,7 +280,7 @@ const ContactPage = () => {
                                     rows={6}
                                     value={formData.message}
                                     onChange={handleChange}
-                                    className="input-field resize-none"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-colors resize-none"
                                     placeholder="Tell us how we can help you..."
                                 />
                             </div>

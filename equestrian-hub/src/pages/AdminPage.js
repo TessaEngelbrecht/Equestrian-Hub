@@ -7,6 +7,8 @@ import AdminDashboard from '../components/Admin/AdminDashboard'
 import OrderManagement from '../components/Admin/OrderManagement'
 import BookingManagement from '../components/Admin/BookingManagement'
 import ProductManagement from '../components/Admin/ProductManagement'
+import CustomerManagement from '../components/Admin/CustomerManagement'
+import Analytics from '../components/Admin/Analytics'
 
 const AdminPage = () => {
     const { user, loading: authLoading } = useAuth()
@@ -39,15 +41,19 @@ const AdminPage = () => {
     const renderCurrentPage = () => {
         switch (currentPage) {
             case 'dashboard':
-                return <AdminDashboard />
+                return <AdminDashboard setCurrentPage={setCurrentPage} />
             case 'orders':
                 return <OrderManagement />
             case 'bookings':
                 return <BookingManagement />
             case 'products':
                 return <ProductManagement />
+            case 'customers':
+                return <CustomerManagement />
+            case 'analytics':
+                return <Analytics />
             default:
-                return <AdminDashboard />
+                return <AdminDashboard setCurrentPage={setCurrentPage} />
         }
     }
 

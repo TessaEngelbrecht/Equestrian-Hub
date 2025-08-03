@@ -9,7 +9,7 @@ const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY)
 
 export const verifyPaymentProof = async (file, expectedAmount, expectedReference = '') => {
     try {
-        console.log('Starting AI verification for amount:', expectedAmount)
+        //console.log('Starting AI verification for amount:', expectedAmount)
 
         if (!file) {
             throw new Error('No file provided for verification')
@@ -72,7 +72,7 @@ export const verifyPaymentProof = async (file, expectedAmount, expectedReference
         const response = await result.response
         const text = response.text()
 
-        console.log('AI Response:', text)
+       // console.log('AI Response:', text)
 
         // Parse the JSON response
         let verification
@@ -104,7 +104,7 @@ export const verifyPaymentProof = async (file, expectedAmount, expectedReference
             issues: Array.isArray(verification.issues) ? verification.issues : []
         }
 
-        console.log('Normalized verification:', normalizedVerification)
+       // console.log('Normalized verification:', normalizedVerification)
 
         return {
             success: true,

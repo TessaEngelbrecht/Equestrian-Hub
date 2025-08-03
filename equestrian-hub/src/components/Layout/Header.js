@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Menu, X, ShoppingCart, Calendar, User, LogOut } from 'lucide-react'
+import { Menu, X, ShoppingCart, Calendar, User, LogOut, Shield, Settings } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
+import { useAdmin } from '../../contexts/AdminContext'
 import CartDrawer from '../Cart/CartDrawer'
 
 const Header = () => {
@@ -11,6 +12,7 @@ const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false)
     const { user, signOut } = useAuth()
     const { cartItems, openCart } = useCart()
+    const { isAdmin } = useAdmin()
     const navigate = useNavigate()
 
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -25,6 +27,8 @@ const Header = () => {
         { name: 'Home', path: '/' },
         { name: 'Shop', path: '/shop' },
         { name: 'Lessons', path: '/lessons' },
+        { name: 'About', path: '/about' },
+        { name: 'Contact', path: '/contact' },
     ]
 
     return (
@@ -34,6 +38,7 @@ const Header = () => {
                     <div className="flex justify-between items-center py-4">
                         {/* Logo */}
                         <Link to="/" className="flex items-center space-x-2">
+                            <span className="text-2xl animate-gallop">🐎</span>
                             <span className="text-2xl font-display font-bold text-primary">
                                 Meadowbrook Equestrian
                             </span>
@@ -60,7 +65,7 @@ const Header = () => {
                             >
                                 <ShoppingCart size={24} />
                                 {totalItems > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-secondary text-black text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                    <span className="absolute -top-1 -right-1 bg-secondary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                                         {totalItems}
                                     </span>
                                 )}
@@ -72,8 +77,20 @@ const Header = () => {
                                         onClick={() => setShowUserMenu(!showUserMenu)}
                                         className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                     >
-                                        <User size={20} />
+                                        {isAdmin() ? (
+                                            <div className="relative">
+                                                <User size={20} />
+                                                <Shield size={12} className="absolute -top-1 -right-1 text-primary" />
+                                            </div>
+                                        ) : (
+                                            <User size={20} />
+                                        )}
                                         <span className="text-sm font-medium">{user.email}</span>
+                                        {isAdmin() && (
+                                            <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">
+                                                Admin
+                                            </span>
+                                        )}
                                     </button>
 
                                     <AnimatePresence>
@@ -82,19 +99,48 @@ const Header = () => {
                                                 initial={{ opacity: 0, y: -10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, y: -10 }}
-                                                className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                                                className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border"
                                             >
+                                                {isAdmin() && (
+                                                    <>
+                                                        <Link
+                                                            to="/admin"
+                                                            className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                                                            onClick={() => setShowUserMenu(false)}
+                                                        >
+                                                            <Shield className="mr-2 text-primary" size={16} />
+                                                            <div>
+                                                                <div className="font-medium">Admin Dashboard</div>
+                                                                <div className="text-xs text-gray-500">Manage your business</div>
+                                                            </div>
+                                                        </Link>
+                                                        <div className="border-t my-1"></div>
+                                                    </>
+                                                )}
+
                                                 <Link
-                                                    to="/admin"
-                                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                                    to="/my-orders"
+                                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+                                                    onClick={() => setShowUserMenu(false)}
+                                                >
+                                                    <ShoppingCart className="mr-2" size={16} />
+                                                    My Orders
+                                                </Link>
+
+                                                <Link
+                                                    to="/my-bookings"
+                                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                                                     onClick={() => setShowUserMenu(false)}
                                                 >
                                                     <Calendar className="mr-2" size={16} />
                                                     My Bookings
                                                 </Link>
+
+                                                <div className="border-t my-1"></div>
+
                                                 <button
                                                     onClick={handleSignOut}
-                                                    className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100"
+                                                    className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                                                 >
                                                     <LogOut className="mr-2" size={16} />
                                                     Sign Out
@@ -113,7 +159,7 @@ const Header = () => {
                                     </Link>
                                     <Link
                                         to="/signup"
-                                        className="px-4 py-2 bg-primary text-black rounded-lg hover:bg-primary-light transition-colors font-medium"
+                                        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-light transition-colors font-medium"
                                     >
                                         Sign Up
                                     </Link>
@@ -165,13 +211,33 @@ const Header = () => {
 
                                     {user ? (
                                         <>
+                                            {isAdmin() && (
+                                                <Link
+                                                    to="/admin"
+                                                    className="flex items-center text-primary hover:text-primary-light transition-colors font-medium"
+                                                    onClick={() => setIsOpen(false)}
+                                                >
+                                                    <Shield className="mr-2" size={16} />
+                                                    Admin Dashboard
+                                                </Link>
+                                            )}
+
                                             <Link
-                                                to="/admin"
+                                                to="/my-orders"
                                                 className="text-gray-700 hover:text-primary transition-colors font-medium"
                                                 onClick={() => setIsOpen(false)}
                                             >
-                                                My Account
+                                                My Orders
                                             </Link>
+
+                                            <Link
+                                                to="/my-bookings"
+                                                className="text-gray-700 hover:text-primary transition-colors font-medium"
+                                                onClick={() => setIsOpen(false)}
+                                            >
+                                                My Bookings
+                                            </Link>
+
                                             <button
                                                 onClick={() => {
                                                     handleSignOut()

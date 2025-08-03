@@ -33,16 +33,45 @@ export const AuthProvider = ({ children }) => {
         return () => subscription.unsubscribe()
     }, [])
 
+    // In your AuthContext.js, update the signUp function:
     const signUp = async (email, password, metadata = {}) => {
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: metadata
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: metadata
+                }
+            })
+
+            if (error) throw error
+
+            // **ADD THIS: Create user profile in public.users table**
+            if (data.user) {
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: data.user.id, // Same ID as auth user
+                        email: data.user.email,
+                        name: metadata.name || '',
+                        surname: metadata.surname || '',
+                        contact_number: metadata.contact_number || '',
+                        created_at: new Date().toISOString()
+                    })
+
+                if (profileError) {
+                    console.error('Error creating user profile:', profileError)
+                    // Don't throw error - user is authenticated, profile can be created later
+                }
             }
-        })
-        return { data, error }
+
+            return { data, error }
+        } catch (error) {
+            console.error('Error in signUp:', error)
+            return { data: null, error }
+        }
     }
+
 
     const signIn = async (email, password) => {
         const { data, error } = await supabase.auth.signInWithPassword({

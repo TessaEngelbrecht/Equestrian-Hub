@@ -273,7 +273,7 @@ const PaymentPage = () => {
                                     Back to Home
                                 </button>
                                 <button
-                                    onClick={() => navigate('/admin')}
+                                    onClick={() => navigate('/my-orders')}
                                     className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
                                 >
                                     View My {type === 'lesson' ? 'Bookings' : 'Orders'}

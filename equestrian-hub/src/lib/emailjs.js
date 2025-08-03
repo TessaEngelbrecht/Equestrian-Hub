@@ -5,6 +5,23 @@ const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID
 const TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID
 const PUBLIC_KEY = process.env.REACT_APP_EMAILJS_PUBLIC_KEY
 
+// Universal email sending function
+const sendUniversalEmail = async (templateParams) => {
+    try {
+        const response = await emailjs.send(
+            SERVICE_ID,
+            TEMPLATE_ID,
+            templateParams,
+            PUBLIC_KEY
+        )
+        //('Email sent successfully:', response)
+        return { success: true, response }
+    } catch (error) {
+        console.error('Error sending email:', error)
+        return { success: false, error }
+    }
+}
+
 export const sendOrderEmail = async (orderData, userInfo, orderId, verificationResult = null) => {
     try {
         // Get payment proof URL if available
@@ -56,7 +73,7 @@ AI Verification Details:
 • Document Type: ${v.documentType || 'Unknown'}
 • Confidence Score: ${confidence}%
 ${v.issues && v.issues.length > 0 ? `• Issues Found: ${v.issues.join(', ')}` : ''}
-      `.trim()
+            `.trim()
         }
 
         // Format order items
@@ -64,12 +81,15 @@ ${v.issues && v.issues.length > 0 ? `• Issues Found: ${v.issues.join(', ')}` :
             `• ${item.name} × ${item.quantity} - R${(item.price * item.quantity).toFixed(2)}`
         ).join('\n') : 'No items'
 
-        // Prepare email template parameters
+        // Prepare email template parameters for ORDER
         const templateParams = {
             to_email: 'tessa.engelbrecht@gmail.com',
+            email_type: 'New Order Received',
+            subject_line: `Order #${orderId?.slice(0, 8) || 'Pending'}`,
             customer_name: `${userInfo.name} ${userInfo.surname}`,
             customer_email: userInfo.email,
             customer_phone: userInfo.contact_number,
+            // Order-specific fields
             order_items: itemsList,
             total_amount: `R${orderData.total.toFixed(2)}`,
             pickup_location: orderData.pickup_location || 'Meadowbrook Equestrian',
@@ -77,21 +97,21 @@ ${v.issues && v.issues.length > 0 ? `• Issues Found: ${v.issues.join(', ')}` :
             payment_proof_url: paymentProofUrl || 'No payment proof uploaded',
             ai_verification_summary: verificationSummary,
             ai_verification_details: verificationDetails,
-            order_id: orderId || 'Pending'
+            order_id: orderId || 'Pending',
+            // Empty other fields
+            lesson_type: '',
+            lesson_date: '',
+            lesson_time: '',
+            weeks_booked: '',
+            booking_id: '',
+            contact_message: '',
+            subject: '',
+            date: ''
         }
 
-        // Send email
-        const response = await emailjs.send(
-            SERVICE_ID,
-            TEMPLATE_ID,
-            templateParams,
-            PUBLIC_KEY
-        )
-
-        console.log('Email sent successfully:', response)
-        return { success: true, response }
+        return await sendUniversalEmail(templateParams)
     } catch (error) {
-        console.error('Error sending email:', error)
+        console.error('Error sending order email:', error)
         return { success: false, error }
     }
 }
@@ -117,28 +137,70 @@ export const sendLessonBookingEmail = async (bookingData, userInfo, bookingId, v
 
         const templateParams = {
             to_email: 'tessa.engelbrecht@gmail.com',
+            email_type: 'New Lesson Booking',
+            subject_line: `Booking #${bookingId?.slice(0, 8) || 'Pending'}`,
             customer_name: `${userInfo.name} ${userInfo.surname}`,
             customer_email: userInfo.email,
             customer_phone: userInfo.contact_number,
+            // Lesson-specific fields
             lesson_type: bookingData.lessonType.name,
             lesson_date: bookingData.selectedDate,
             lesson_time: `${bookingData.selectedSlot.start_time} - ${bookingData.selectedSlot.end_time}`,
             weeks_booked: bookingData.weeksBooked || 1,
             total_amount: `R${bookingData.total.toFixed(2)}`,
             ai_verification_summary: verificationSummary,
-            booking_id: bookingId || 'Pending'
+            booking_id: bookingId || 'Pending',
+            // Empty other fields
+            order_items: '',
+            pickup_location: '',
+            order_date: '',
+            payment_proof_url: '',
+            ai_verification_details: '',
+            order_id: '',
+            contact_message: '',
+            subject: '',
+            date: ''
         }
 
-        const response = await emailjs.send(
-            SERVICE_ID,
-            'template_lesson_booking', // You'll need to create this template in EmailJS
-            templateParams,
-            PUBLIC_KEY
-        )
-
-        return { success: true, response }
+        return await sendUniversalEmail(templateParams)
     } catch (error) {
         console.error('Error sending lesson booking email:', error)
+        return { success: false, error }
+    }
+}
+
+export const sendContactEmail = async (formData) => {
+    try {
+        const templateParams = {
+            to_email: 'tessa.engelbrecht@gmail.com',
+            email_type: 'Contact Form Submission',
+            subject_line: formData.subject,
+            customer_name: formData.name,
+            customer_email: formData.email,
+            customer_phone: formData.phone || 'Not provided',
+            // Contact-specific fields
+            contact_message: formData.message,
+            subject: formData.subject,
+            date: new Date().toLocaleString(),
+            // Empty other fields
+            order_items: '',
+            total_amount: '',
+            pickup_location: '',
+            order_date: '',
+            payment_proof_url: '',
+            ai_verification_summary: '',
+            ai_verification_details: '',
+            order_id: '',
+            lesson_type: '',
+            lesson_date: '',
+            lesson_time: '',
+            weeks_booked: '',
+            booking_id: ''
+        }
+
+        return await sendUniversalEmail(templateParams)
+    } catch (error) {
+        console.error('Error sending contact email:', error)
         return { success: false, error }
     }
 }
@@ -147,21 +209,31 @@ export const sendCustomerConfirmationEmail = async (orderData, userInfo, orderId
     try {
         const templateParams = {
             to_email: userInfo.email,
+            email_type: 'Order Confirmation',
+            subject_line: `Your Order #${orderId?.slice(0, 8)} - ${orderStatus}`,
             customer_name: `${userInfo.name} ${userInfo.surname}`,
+            customer_email: userInfo.email,
+            customer_phone: userInfo.contact_number,
             order_id: orderId,
-            order_status: orderStatus,
+            order_date: new Date().toLocaleString(),
             total_amount: `R${orderData.total.toFixed(2)}`,
-            order_date: new Date().toLocaleString()
+            // Empty other fields as needed
+            order_items: '',
+            pickup_location: '',
+            payment_proof_url: '',
+            ai_verification_summary: '',
+            ai_verification_details: '',
+            lesson_type: '',
+            lesson_date: '',
+            lesson_time: '',
+            weeks_booked: '',
+            booking_id: '',
+            contact_message: '',
+            subject: '',
+            date: ''
         }
 
-        const response = await emailjs.send(
-            SERVICE_ID,
-            'template_customer_confirmation', // You'll need to create this template
-            templateParams,
-            PUBLIC_KEY
-        )
-
-        return { success: true, response }
+        return await sendUniversalEmail(templateParams)
     } catch (error) {
         console.error('Error sending customer confirmation email:', error)
         return { success: false, error }
